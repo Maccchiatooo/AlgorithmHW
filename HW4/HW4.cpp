@@ -1,4 +1,6 @@
 #include <iostream>
+#include <list>
+
 
 using namespace std;
 
@@ -12,35 +14,40 @@ vertex_list * graph_part(int n, int k, vertex_list * edges[], int r){
     //vertex_list 1 *edges[1]
     //1->next[1]= first neighbor
 
-    int *len;
+    //construct left list and right list
+    list <vertex_list> L;
+    list <vertex_list> R;
+    for (int i=0; i<k; i++){
+        L.push_back(*Edges[i]);
+    }
+    for (int R=0; i<n-k; i++){
+        B.push_back(*Edges[i]);
+    }
+
+    //calcualte the number of neibors
+    int *Numofnei;
     for(int i=0; i<n; i++){
         vertex_list Edges[i]= * edges[i];
-        len[i]=0;
+        Numofnei[i]=0;
         while(Edges[i].next){
             Edges[i].next++;
-            len[i]++;
+            Numofnei[i]++;
         }
     }
+    //calculate the external link/internal link and the cost
 
-    vertex_list * A;
-    for (int i=0; i<k; i++){
-        A[i] = * edges[i];
-    }
-
-    vertex_list * B;
-    for (int i=0; i<n-k; i++){
-        B[i] = * edges[i+k];
-    }
-    int *D;
-    int *inter;
     int *exter;
-    for (int i=0; i<k; i++){
-        inter[i]=0;
-        exter[i]=0;
-        for (int jj=0; jj<len[i];jj++){
+    int *inter;
+    int **cost;
+    int *D;
+    //calculate the external/ internal link
+    for (int u=0; u<k; u++){
+        inter[u]=0;
+        exter[u]=0;
+        for (int v=0; v<Numofnei[u]; v++){
             
-            for (int j=i+1; j<k; j++){
-                if (A[i].next[jj].v==A[j].v){
+            for (int w=u+1; w<k; w++){
+                if (A[u].next[v].v==A[j].v){
                     g[i][j]=1;
                     inter[i]++;
                 }
