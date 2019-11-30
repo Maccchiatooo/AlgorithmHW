@@ -1,6 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <list>
 #include <map>
+#include <set>
+
+
 
 
 using namespace std;
@@ -12,223 +17,244 @@ typedef struct v_l vertex_list;
 vertex_list * graph_part(int n, int k, vertex_list * edges[], int r){
 
 
-
-
+    
+    int nnn=0;
     int Gmax=0;
-
-    do{  
+    int num=0;
+    vertex_list *record;
+      
     //vertex_list 1 *edges[1]
     //1->next[1]= first neighbor
 
     //construct left list and right list
+    map <int,vertex_list> LL;
+    map <int,vertex_list> RR;
     map <int,vertex_list> L;
     map <int,vertex_list> R;
     map <int,vertex_list>::iterator it;
     vertex_list *l;
-    vertex_list *r;
-    for (int i=0; i<k; i++){
-        L.insert(makepair(i,*edges[i]));
-    }
-    for (int i=k; i<n; i++){
-        R.insert(makepair(i,*edges[i]));
-    }
-
-    //calcualte the number of neibors
-    int *Numofnei;
-    vertex_list *Edges;
-    for(int i=0; i<n; i++){
-        Edges[i]= * edges[i];
-        Numofnei[i]=0;
-        while(Edges[i].next){
-            Edges[i].next++;
-            Numofnei[i]++;
-        }
-    }
-    //calculate the external link/internal link and the cost
-
-    int *exter;
-    int *inter;
-    int **cost;
-    int *D;
-    int nl=0;
-    int nr=0;
-    //construct the left vertex
-    for(it=L.find(0);it!=L.find(k);++it){
-        l[nl]=it->second;
-        nl++;
-    }
+    vertex_list *rr;
     
-    //construct the right vertex
-    for(it=R.find(k);it!=R.find(n);++it){    
-        r[nr]=it->second;
-        nr++;
-    }
-
-
-
-
-
-    //calculate the external/ internal link for the left side
     for (int i=0; i<k; i++){
-        inter[i]=0;
-        exter[i]=0;
-        for (int j=0; j<Numofnei[i]; j++){
-            //internal value
-            for (int p=i+1; p<k; p++){
-                if (l[i].next[j].v==l[p].v){
-                    cost[i][p]=1;
-                    inter[i]++;
-                }
-            }
-            //external value
-            for (int q=0; q<n-k; q++){
-
-                if (l[i].next[j].v==r[q].v){
-                    cost[i][q]=1;
-                    exter[i]++;
-                }
-            }
-        }    
-        D[i]=exter[i]-inter[i];
+        L.insert(make_pair(i,*edges[i]));
     }
-    //calculate the external/ internal link for the right side
     for (int i=k; i<n; i++){
-        inter[i]=0;
-        exter[i]=0;
-        for (int j=0; j<Numofnei[i]; j++){
-            //internal value
-            for (int p=i+1; p<n; p++){
-                if (r[i-k].next[j].v==r[p-k].v){
-                    inter[i]++;
-                    cost[i][p]=1;
-                }
-            }
+        R.insert(make_pair(i,*edges[i]));
+    }
+   
+    
+    
+    //do{ 
+        
+        //set the calculation vertex list
+        LL=L;
+        RR=R;
+        //calculate the external link/internal link and the cost
 
-            for (int q=0; q<k; q++){
+        int *exter;
+        int *inter;
+        exter=(int*) malloc( n* sizeof(int) );
+        inter=(int*) malloc( n* sizeof(int) );
 
-                if (r[i-k].next[j].v==l[q].v){
-                    exter[i]++;
-                    cost[i][q]=1;
-                }
+
+        for(int i=0;i<n;i++){
+            exter[i]=0;
+            inter[i]=0;
+
+            
+        }
+        
+
+        
+        int **cost = new int*[n];
+        for (int i = 0; i < n; ++i) {
+        cost[i] = new int[n];
+        }
+
+        
+
+       
+
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                cost[i][j]=0;
             }
         }
-        D[i]=exter[i]-inter[i];    
-    }
 
-    //calculation of the gain value
-    int ** g;
-    for (int i=0;i<k;i++){
-        for (int j=k;j<n;j++){
-            for(int o=0;o<Numofnei[i];o++){
-                if (l[i].next[o].v==r[j-k].v)
-                g[i][j]=D[i]-D[j]-2;
+        int **gain = new int*[n];
+        for (int i = 0; i < n; ++i) {
+        gain[i] = new int[n];
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                gain[i][j]=0;
             }
-            g[i][j]=D[i]-D[j];
+        }
+
+    
+
+        int *D;
+        D=(int*) malloc( n* sizeof(int) );
+
+    //calculate the external and internal and the D and the cost 
+
+        
+        for (int i=0; i<n;i++){
+            cost[i][edges[i]->next->v]=1;
+            
+            }
+   //calculate the internal and the external
+
+    for(int i=0;i<k;i++){
+        for(int j=0;j<k;j++){
+            if(edges[i]->next->v==edges[j]->v){
+                inter[i]++;
+                inter[j]++;
+            }
         }
     }
 
-    //caculation of the max value of the gain
-    int *ld;
-    int *rd;
-    int *gmax;
-    int num=0;
-    int *Gadd;
+    for(int i=k;i<n;i++){
+        for(int j=k;j<n;j++){
+            if(edges[i]->next->v==edges[j]->v){
+                inter[i]++;
+                inter[j]++;
+            }
+        }
+    }
 
     for(int i=0;i<k;i++){
         for(int j=k;j<n;j++){
-            if (gmax[num]<g[i][j]){
-                gmax[num]=g[i][j];
-                ld[num]=i;
-                rd[num]=j;
-            }    
-        }
-    }
-    Gadd[0]=gmax[num];
-     
-     
-    vertex_list *ll;
-    vertex_list *rr;
-    do{
-        for (it=L.begin();it!=L.end();it++){
-        if ((it->second).v==ld[num]){
-        ll[num]=it->second;
-        erase(it);
-        }
-    }    
-    for (it=R.begin();it!=R.end();it++){
-        if (*it.v==rd[num]){
-        rr[num]=it->second;
-        erase(it);
-        }
-    }  
-
-    int nl=0;
-    int nr=0;
-    //construct the left vertex
-    for(it=L.begin();it!=L.end();++it){
-        l[nl]=it->second;
-        nl++;
-    }
-    
-    //construct the right vertex
-    for(it=R.begin();it!=R.end();++it){    
-        r[nr]=it->second;
-        nr++;
-    }
-
-    //recalculate the D and the gain value
-    for (int i=0;i<nl+nr;i++){
-    D[i]=D[i]+2*cost[i][ld[num]]-2*cost[i][rd[num]];}
-
-    for (int i=0;i<nl;i++){
-        for (int j=nl;j<nl+nr;j++){
-        g[i][j]=D[i]-D[j]-2*c[i][j];
+            if(edges[i]->next->v==edges[j]->v){
+                exter[i]++;
+                exter[j]++;    
+            }
         }
     }
 
-    //recalculate the Gain max
+    for(int i=k;i<n;i++){
+        for(int j=0;j<k;j++){
+            if(edges[i]->next->v==edges[j]->v){
+                exter[i]++;
+                exter[j]++;
+            }
+        }
+    }
+
+
+    //calculation of the D value
+    for(int i=0;i<n;i++){
+        D[i]=exter[i]-inter[i];
+       
+
         
-    num++;  
-    for(int i=0;i<nl;i++){
-        for(int j=nl;j<nl+nr;j++){
-            if (gmax[num]<g[i][j]){
-                gmax[num]=g[i][j];
-                ld[num]=i;
-                rd[num]=j;
-            }    
-        }
     }
-    }while(nl==1);
+
+    //calculation of the gain value
+    int gmax=0;
+    int left=0;
+    int right=0;
+
+    for (int i=0;i<k;i++){
+            for (int j=k;j<n;j++){
+
+                if(edges[i]->next->v==edges[j]->v||edges[i]->v==edges[j]->next->v){
+                    gain[i][j]=D[i]-D[j]-2;
+                }else gain[i][j]=D[i]-D[j];
+                
+              
+                
+                if(gmax<gain[i][j]){
+                    
+                    gmax=gain[i][j];
+                    
+                    left=i;
+                    right=j;
+
+                    
+                    
+                }
+
+           }
+                
+    }
+
+    list <int> gv;
+    list <int> lv;
+    list <int> rv;
+    set <int> lr;
+    set <int> ::iterator its;
+    list <int>::iterator itr;
+    list <int>::iterator itrr;
+
+    gv.push_back(gmax);
+    gmax=0;
+    lv.push_back(left);
+    rv.push_back(right);
+    lr.insert(left);
+    lr.insert(right);
+   // cout<<left<<endl;
+   // cout<<right<<endl;
+   
 
 
+    while(lv.size()!=k){
 
-    for(int i=1;i<k;i++){
+        
+        
          
-         Gadd[i]=Gadd[i-1]+gmax[i];
-    }
-    
-    int GG=0;
-    for(int i=0;i<k;i++){
-        if (Gmax<Gadd[i]){
-            Gmax=Gadd[i];
-            GG=i;
+        for(int i=0;i<n;i++){
+            if(lr.count(i)==0){
+                D[i]=D[i]+2*cost[i][left]-2*cost[i][right];
+            }
         }
-    }
-    for (int i=0;i<GG;i++){
+           
+        for(int i=0;i<k;i++){
+            for (int j=k;j<n;j++){
+                if(lr.count(i)==0&&lr.count(j)==0){
+                    
+                    gain[i][j]=D[i]-D[j]-2*cost[i][j];
+                    if(gmax<=gain[i][j]){
+                        gmax=gain[i][j];
+                       
+                        left=i;
+                        right=j; 
 
-        vertex_list ret[i]=l[i];
-    }
+                        
 
-    for (int i=GG;i<2*GG;i++){
-
-        vertex_list ret[i]=r[i-GG];
-    }
+                        
+                    }
+                    
+                }
+            } 
+        }
     
-    
-    }while(Gmax<0||Gmax==0);
+        gv.push_back(gmax);
+        
+        gmax=-1000;
+        lv.push_back(left);
+        rv.push_back(right);
+
+        
+        lr.insert(left);
+        lr.insert(right);
+
+        
+
+    }
 
 
-    
+  //  for (itr=gv.begin();itr!=gv.end();++itr){
+    //    cout<<*itr<<endl;
+    //}
+        
+    for (itr=lv.begin();itr!=lv.end();++itr){
+        cout<<*itr<<endl;
+    }
+
+   for (itr=rv.begin();itr!=rv.end();++itr){
+        cout<<*itr<<endl;
+    }
 
 
 
@@ -236,22 +262,35 @@ vertex_list * graph_part(int n, int k, vertex_list * edges[], int r){
 
 
 
+
+return l;
 };
-/*
-int main(){
 
-    vertex_list a;
-    a.v=5;
-    vertex_list b;
-    b.v=20;
-    a.next[0]=b;
-    vertex_list b1;
-    b1.v=30;
-    a.next[1]=b1;
-    vertex_list b2;
-    b2.v=30;
-    a.next[2]=b2;
-    int as=a.next;
-    cout<<as;
-}*/
+int main()
+{   vertex_list * graph[1000], *result, *e, *tmp;
+    int i,j, cross;
+    int partition[1000];
 
+    // make empty graph     
+    e = (vertex_list *) malloc( 10000* sizeof(vertex_list) );
+    for(i=0; i<1000; i++)
+      graph[i] = NULL;
+    printf("Test 1: A cycle with 1000 vertices\n");
+    // now fill it as a cycle //
+    for(i=0,j=0; i<1000; i++)
+      {  graph[i] = e+j; j+=1; //next available edge node //
+	(graph[i])->v = (i+999)%1000;
+        (graph[i])->next = e+j; j+=1; //next available edge node //
+        (graph[i])->next->v = (i+1)%1000;
+        (graph[i])->next->next = NULL;
+      }
+      printf("Made a cycle, now try to partition it\n"); fflush(stdout);
+    result=graph_part(1000, 500, graph, 100);
+
+  
+
+
+    
+
+
+}
